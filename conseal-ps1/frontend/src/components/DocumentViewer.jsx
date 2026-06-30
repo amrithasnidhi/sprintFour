@@ -10,12 +10,12 @@ export default function DocumentViewer({
   const segments = buildSegments(text, spans)
 
   return (
-    <article className="rounded-2xl border border-rule bg-white shadow-panel overflow-hidden">
+    <article className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md shadow-2xl overflow-hidden">
       {/* Accent top bar */}
       <div className="h-[3px] bg-gradient-to-r from-accent via-violet-500 to-indigo-400" />
 
       <div className="p-8 sm:p-10">
-        <header className="mb-6 pb-5 border-b border-rule">
+        <header className="mb-6 pb-5 border-b border-white/5">
           <div className="flex items-center gap-2 mb-3">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />

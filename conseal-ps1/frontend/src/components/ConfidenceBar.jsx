@@ -12,7 +12,7 @@ export default function ConfidenceBar({ value }) {
     : isMid
     ? 'bg-accent/70'
     : 'bg-accent'
-  const labelClass = isLow ? 'text-amber-700' : 'text-ink'
+  const labelClass = isLow ? 'text-amber-400' : 'text-ink'
 
   return (
     <div className="w-full">
@@ -31,7 +31,7 @@ export default function ConfidenceBar({ value }) {
         />
       </div>
       {isLow && (
-        <p className="mt-1.5 text-[11px] text-amber-700">
+        <p className="mt-1.5 text-[11px] text-amber-400">
           Borderline — worth your own review.
         </p>
       )}

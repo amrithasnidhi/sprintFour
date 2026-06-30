@@ -165,7 +165,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
   const isLoading = status === 'loading' || status === 'uploading'
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: '#06091a' }}>
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-canvas">
       {/* ── Full-screen Dither background ── */}
       <div className="absolute inset-0 z-0">
         <Dither
@@ -184,12 +184,12 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, #06091a 100%)',
+          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, #0B0F19 100%)',
         }}
       />
       {/* Bottom fade so the tab bar blends */}
       <div className="absolute bottom-0 left-0 right-0 h-32 z-[1] pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, transparent, #06091a)' }}
+        style={{ background: 'linear-gradient(to bottom, transparent, #0B0F19)' }}
       />
 
       {/* ── Header ── */}
@@ -269,10 +269,10 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
               const file = e.dataTransfer.files?.[0]
               if (file && !isLoading) handle(file)
             }}
-            className={`rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
+            className={`rounded-2xl border-2 border-dashed p-8 text-center transition-all backdrop-blur-sm ${
               dragOver
-                ? 'border-blue-400/60 bg-blue-500/10'
-                : 'border-white/15 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.05]'
+                ? 'border-accent/60 bg-accent/10'
+                : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
             }`}
           >
             <input
@@ -429,7 +429,7 @@ function ReviewPage({
           {/* Back */}
           <button
             onClick={onBack}
-            className="cursor-target flex items-center justify-center h-8 w-8 rounded-lg border border-rule bg-white hover:border-accent/40 transition-colors shrink-0"
+            className="cursor-target flex items-center justify-center h-8 w-8 rounded-lg border border-rule bg-white/[0.02] hover:bg-white/[0.06] hover:border-accent/40 transition-colors shrink-0"
             aria-label="Back to upload"
           >
             <svg
@@ -468,14 +468,14 @@ function ReviewPage({
 
       {/* ── Sub-banner (document tab only) ── */}
       {activeTab === 'document' && (
-        <div className="border-b border-rule bg-white">
+        <div className="border-b border-rule bg-white/[0.01]">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-8 h-10 flex items-center justify-between gap-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
               {rawSpansCount} spans detected · real pipeline
             </p>
             <button
               onClick={onBack}
-              className="cursor-target inline-flex items-center gap-1.5 rounded-md border border-rule bg-white px-3 py-1 text-[11px] font-medium text-ink hover:border-accent/50 hover:text-accent transition-colors shrink-0"
+              className="cursor-target inline-flex items-center gap-1.5 rounded-md border border-rule bg-white/[0.02] px-3 py-1 text-[11px] font-medium text-ink hover:border-accent/50 hover:text-accent hover:bg-white/[0.04] transition-colors shrink-0"
             >
               <svg
                 viewBox="0 0 14 14"
@@ -651,8 +651,8 @@ function SidebarTab({ label, icon, active, onClick, badge }) {
       onClick={onClick}
       className={`cursor-target flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all ${
         active
-          ? 'bg-white shadow-sm text-ink border border-rule/80'
-          : 'text-muted hover:text-ink'
+          ? 'bg-white/[0.06] shadow-sm text-ink border border-white/10'
+          : 'text-muted hover:text-ink hover:bg-white/[0.02]'
       }`}
     >
       <span className={active ? 'text-accent' : 'opacity-60'}>{icon}</span>

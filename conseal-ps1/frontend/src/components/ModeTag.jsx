@@ -7,7 +7,7 @@ export default function ModeTag({ mode, compact = false }) {
   const base =
     'inline-flex items-center gap-1.5 rounded-full border font-medium tracking-tight'
   const palette = isRedact
-    ? 'border-ink/15 bg-ink text-white'
+    ? 'border-white/20 bg-white/10 text-white'
     : 'border-accent/30 bg-accent-soft text-accent'
   const size = compact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[11px]'
 

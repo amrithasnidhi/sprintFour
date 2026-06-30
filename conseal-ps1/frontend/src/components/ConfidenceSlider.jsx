@@ -20,9 +20,9 @@ export default function ConfidenceSlider({
       </p>
 
       {/* Card */}
-      <div className="rounded-2xl border border-rule bg-white shadow-panel overflow-hidden">
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md shadow-2xl overflow-hidden">
         {/* Gradient slider zone */}
-        <div className="bg-gradient-to-br from-accent/[0.07] to-violet-50/60 border-b border-rule px-5 pt-4 pb-5 space-y-3">
+        <div className="bg-gradient-to-br from-accent/[0.1] to-violet-500/[0.05] border-b border-white/5 px-5 pt-4 pb-5 space-y-3">
           {/* Threshold label + number */}
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent font-semibold">
@@ -81,8 +81,8 @@ export default function ConfidenceSlider({
             to right,
             #2563EB 0%,
             #2563EB ${pct}%,
-            #E2E8F0 ${pct}%,
-            #E2E8F0 100%
+            rgba(255, 255, 255, 0.1) ${pct}%,
+            rgba(255, 255, 255, 0.1) 100%
           );
           border-radius: 9999px;
           outline: none;

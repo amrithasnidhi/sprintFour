@@ -4,13 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Match the Conseal site palette.
-        ink: '#0F172A',        // primary text / nav
-        accent: '#2563EB',     // brand blue
-        'accent-soft': '#EEF2FF',
-        canvas: '#F8FAFC',     // page background
-        rule: '#E2E8F0',       // hairline borders
-        muted: '#64748B',      // secondary text
+        // Premium Dark Theme
+        ink: '#F8FAFC',        // primary text
+        accent: '#3B82F6',     // brand blue (adjusted for dark mode contrast)
+        'accent-soft': 'rgba(59, 130, 246, 0.12)', // translucent blue
+        canvas: '#0B0F19',     // page background
+        rule: 'rgba(255, 255, 255, 0.08)', // hairline borders
+        muted: '#94A3B8',      // secondary text
       },
       fontFamily: {
         // System sans for body; the wordmark uses a heavy weight to mimic Conseal.

@@ -6,7 +6,7 @@ export default function ClearedPanel({ spans, selectedSpanId, onSelectSpan }) {
   return (
     <section>
       {/* Card */}
-      <div className="rounded-2xl border border-rule bg-white shadow-panel p-5">
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md shadow-2xl p-5">
         {/* Header row */}
         <div className="flex items-center justify-between mb-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
@@ -24,10 +24,10 @@ export default function ClearedPanel({ spans, selectedSpanId, onSelectSpan }) {
 
         {clearedSpans.length === 0 ? (
           <div className="text-center py-6">
-            <div className="mx-auto h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
+            <div className="mx-auto h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center mb-2">
               <svg
                 viewBox="0 0 14 14"
-                className="h-4 w-4 text-emerald-500"
+                className="h-4 w-4 text-emerald-400"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -152,8 +152,8 @@ function ClearedRow({ span, isSelected, onSelect }) {
         onClick={() => onSelect(span.id)}
         className={`cursor-target w-full text-left rounded-xl border px-3 py-2.5 transition-colors flex items-center gap-3 ${
           isSelected
-            ? 'border-accent/40 bg-accent/[0.04]'
-            : 'border-rule bg-canvas hover:border-accent/30 hover:bg-accent/[0.02]'
+            ? 'border-accent/40 bg-accent/[0.1]'
+            : 'border-white/5 bg-white/[0.02] hover:border-accent/40 hover:bg-white/[0.04]'
         }`}
       >
         {/* Type icon */}

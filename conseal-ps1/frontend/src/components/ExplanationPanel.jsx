@@ -12,11 +12,11 @@ export default function ExplanationPanel({ span }) {
 
   return (
     <section
-      className="rounded-2xl border border-rule bg-white shadow-panel overflow-hidden"
+      className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md shadow-2xl overflow-hidden"
       aria-live="polite"
     >
       {/* Gradient header band */}
-      <div className="bg-gradient-to-br from-accent/[0.07] to-violet-50/60 border-b border-rule px-6 py-4">
+      <div className="bg-gradient-to-br from-accent/[0.1] to-violet-500/[0.05] border-b border-white/5 px-6 py-4">
         <div className="flex items-center justify-between gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent font-semibold">
             Detection Reasoning
@@ -36,7 +36,7 @@ export default function ExplanationPanel({ span }) {
           <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1">
             Span
           </div>
-          <div className="font-mono text-[13px] bg-canvas border border-rule rounded-lg px-3 py-2 text-ink break-all">
+          <div className="font-mono text-[13px] bg-white/[0.03] border border-white/5 rounded-lg px-3 py-2 text-ink break-all">
             {isRedacted && span.effectiveMode === 'anonymize' ? (
               <>
                 <span className="text-accent font-semibold">{tokenFor(span)}</span>
@@ -62,7 +62,7 @@ export default function ExplanationPanel({ span }) {
         </div>
 
         {userOverrode && (
-          <div className="mt-4 pt-4 border-t border-rule">
+          <div className="mt-4 pt-4 border-t border-white/5">
             <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1">
               Your threshold changed this
             </div>
@@ -81,8 +81,8 @@ export default function ExplanationPanel({ span }) {
 
 function EmptyState() {
   return (
-    <section className="rounded-2xl border border-dashed border-rule bg-white p-8 text-center">
-      <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-accent/10 to-violet-100/80 border border-accent/15 flex items-center justify-center mb-4">
+    <section className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+      <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-accent/20 to-violet-500/10 border border-accent/20 flex items-center justify-center mb-4">
         <svg
           viewBox="0 0 20 20"
           className="h-7 w-7 text-accent"
@@ -119,8 +119,8 @@ function TypeBadge({ type }) {
 
 function KeptVisibleTag() {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-800">
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-400">
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
       Kept visible
     </span>
   )
@@ -135,7 +135,7 @@ function DetectionTag({ method }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
-        isRule ? 'text-emerald-700' : 'text-violet-700'
+        isRule ? 'text-emerald-400' : 'text-violet-400'
       }`}
       title={title}
     >
