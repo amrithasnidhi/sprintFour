@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+/* The Con[seal] wordmark — the bracketed half is wrapped in a blue chip. */
+.wordmark-chip {
+  @apply inline-flex items-center justify-center bg-accent text-white px-[6px] py-[2px] rounded-[4px] text-[20px] font-extrabold leading-none tracking-tight;
+}
+
+/* Redacted block — used for `redact` mode (permanent black-box look). */
+.redact-block {
+  @apply inline-flex items-center align-baseline bg-ink text-ink/0 select-none rounded-[3px] px-1.5 py-0 mx-[1px] cursor-pointer;
+  /* The hidden text still occupies width so the layout doesn't reflow. */
+  text-shadow: none;
+}
+.redact-block:hover {
+  @apply ring-2 ring-accent ring-offset-1 ring-offset-canvas;
+}
+
+/* Anonymize pill — labelled token like [NAME_1]. */
+.anonymize-pill {
+  @apply inline-flex items-center bg-accent-soft text-accent border border-accent/30 rounded-md px-1.5 py-0 mx-[1px] font-mono text-[0.9em] cursor-pointer;
+}
+.anonymize-pill:hover {
+  @apply ring-2 ring-accent ring-offset-1 ring-offset-canvas;
+}
+
+/* Kept-visible-but-flagged — dotted underline in the accent color. */
+.kept-visible {
+  @apply cursor-pointer;
+  text-decoration: underline dotted #2563EB;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+.kept-visible:hover {
+  @apply bg-accent-soft rounded-sm;
+}
+
+/* The dim background when a span is selected so the focus pops. */
+.span-selected {
+  @apply ring-2 ring-accent ring-offset-1 ring-offset-canvas;
+}
+
+/* A subtle skeleton shimmer for loading state. */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #E2E8F0 0%, #F1F5F9 40%, #E2E8F0 80%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+  @apply rounded;
+}

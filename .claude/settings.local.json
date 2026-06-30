@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(python generate_mock.py)",
+      "Bash(python -m pip install -r requirements.txt)",
+      "Bash(npm install *)",
+      "Bash(python -m uvicorn main:app --host 127.0.0.1 --port 8000 --log-level info)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://127.0.0.1:8000/api/health)",
+      "Bash(curl -s http://127.0.0.1:8000/api/document)",
+      "Bash(python -c \"import sys, json; d=json.load\\(sys.stdin\\); print\\(f'doc_len={len\\(d[\\\\\"document_text\\\\\"]\\)} spans={len\\(d[\\\\\"spans\\\\\"]\\)}'\\); print\\('first_span:', d['spans'][0]['text']\\)\")",
+      "Bash(python *)",
+      "Bash(curl -s http://127.0.0.1:8000/api/spans/span_5)",
+      "Bash(curl -s -o /dev/null -w \"html_status=%{http_code}\\\\n\" http://127.0.0.1:5173/)",
+      "Bash(curl -s -o /dev/null -w \"proxied_api_status=%{http_code}\\\\n\" http://127.0.0.1:5173/api/document)"
+    ]
+  }
+}

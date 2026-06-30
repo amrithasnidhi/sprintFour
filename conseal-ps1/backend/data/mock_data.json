@@ -1,0 +1,173 @@
+{
+  "document_text": "PATIENT CONFIDENTIALITY FORM — MERIDIAN MEDICAL CENTER\n\nPatient Jonathan M. Richardson, DOB March 14, 1978, was admitted on April 22, 2026 to Meridian Medical Center, San Francisco. Coverage is confirmed under policy BC-2847391-MH with SSN 287-41-9630 on file. The patient is married and authorized release of PHI per HIPAA §164.506. Designated emergency contact is reachable at (415) 555-0142; primary email on file is j.richardson@meridian-health.org. Mailing address: 1847 Divisadero St, San Francisco, CA 94115. Attending physician is Dr. Elena Vasquez (NPI 1093847562). Record ID MRN-008473. Patient self-identifies as Hispanic.",
+  "spans": [
+    {
+      "id": "span_1",
+      "text": "Jonathan M. Richardson",
+      "start": 64,
+      "end": 86,
+      "type": "PERSON_NAME",
+      "decision": "redacted",
+      "mode": "anonymize",
+      "detection_method": "ai_judged",
+      "confidence": 0.96,
+      "reason": "High-confidence personal name match; replaced with [NAME_1] token, recoverable via the local mapping."
+    },
+    {
+      "id": "span_2",
+      "text": "March 14, 1978",
+      "start": 92,
+      "end": 106,
+      "type": "DATE_OF_BIRTH",
+      "decision": "redacted",
+      "mode": "anonymize",
+      "detection_method": "rule_matched",
+      "confidence": 0.98,
+      "reason": "Matched a date pattern adjacent to a date-of-birth label; date-of-birth is a quasi-identifier."
+    },
+    {
+      "id": "span_10",
+      "text": "San Francisco",
+      "start": 167,
+      "end": 180,
+      "type": "LOCATION",
+      "decision": "kept_visible",
+      "mode": null,
+      "detection_method": "ai_judged",
+      "confidence": 0.55,
+      "reason": "City-level location flagged as low-risk; common enough that re-identification risk was assessed as low. Judgment call, not certainty."
+    },
+    {
+      "id": "span_3",
+      "text": "BC-2847391-MH",
+      "start": 217,
+      "end": 230,
+      "type": "POLICY_NUMBER",
+      "decision": "redacted",
+      "mode": "redact",
+      "detection_method": "rule_matched",
+      "confidence": 0.99,
+      "reason": "Matched strict alphanumeric policy-number pattern; permanently removed, not recoverable."
+    },
+    {
+      "id": "span_4",
+      "text": "287-41-9630",
+      "start": 240,
+      "end": 251,
+      "type": "SSN",
+      "decision": "redacted",
+      "mode": "redact",
+      "detection_method": "rule_matched",
+      "confidence": 1.0,
+      "reason": "Matched the standard XXX-XX-XXXX Social Security Number pattern; deterministic, permanently removed."
+    },
+    {
+      "id": "span_5",
+      "text": "married",
+      "start": 276,
+      "end": 283,
+      "type": "MARITAL_STATUS",
+      "decision": "kept_visible",
+      "mode": null,
+      "detection_method": "ai_judged",
+      "confidence": 0.42,
+      "reason": "Flagged as potentially sensitive demographic info, but confidence was below threshold. Borderline — worth a manual look."
+    },
+    {
+      "id": "span_6",
+      "text": "HIPAA §164.506",
+      "start": 318,
+      "end": 332,
+      "type": "REGULATORY_CITATION",
+      "decision": "kept_visible",
+      "mode": null,
+      "detection_method": "rule_matched",
+      "confidence": 0.97,
+      "reason": "Matched as a legal/regulatory citation, not personal data; confidently cleared rather than just unflagged."
+    },
+    {
+      "id": "span_7",
+      "text": "(415) 555-0142",
+      "start": 379,
+      "end": 393,
+      "type": "PHONE_NUMBER",
+      "decision": "redacted",
+      "mode": "anonymize",
+      "detection_method": "rule_matched",
+      "confidence": 0.99,
+      "reason": "Matched standard US phone format; high deterministic confidence. Anonymized with a recoverable token."
+    },
+    {
+      "id": "span_8",
+      "text": "j.richardson@meridian-health.org",
+      "start": 420,
+      "end": 452,
+      "type": "EMAIL",
+      "decision": "redacted",
+      "mode": "anonymize",
+      "detection_method": "rule_matched",
+      "confidence": 0.99,
+      "reason": "Matched standard email pattern; anonymized so downstream processing can still reference the same person."
+    },
+    {
+      "id": "span_9",
+      "text": "1847 Divisadero St, San Francisco, CA 94115",
+      "start": 471,
+      "end": 514,
+      "type": "ADDRESS",
+      "decision": "redacted",
+      "mode": "redact",
+      "detection_method": "ai_judged",
+      "confidence": 0.92,
+      "reason": "Full mailing address combines a street, city and ZIP — a direct identifier; permanently removed."
+    },
+    {
+      "id": "span_11",
+      "text": "Dr. Elena Vasquez",
+      "start": 539,
+      "end": 556,
+      "type": "PERSON_NAME",
+      "decision": "kept_visible",
+      "mode": null,
+      "detection_method": "ai_judged",
+      "confidence": 0.68,
+      "reason": "Matched as a person's name, but appears to be a treating clinician rather than the patient. Kept visible — borderline, review if sharing externally."
+    },
+    {
+      "id": "span_12",
+      "text": "1093847562",
+      "start": 562,
+      "end": 572,
+      "type": "NPI",
+      "decision": "redacted",
+      "mode": "anonymize",
+      "detection_method": "rule_matched",
+      "confidence": 0.95,
+      "reason": "Matched 10-digit National Provider Identifier pattern; anonymized to preserve referential integrity."
+    },
+    {
+      "id": "span_13",
+      "text": "MRN-008473",
+      "start": 585,
+      "end": 595,
+      "type": "MEDICAL_RECORD_NUMBER",
+      "decision": "redacted",
+      "mode": "redact",
+      "detection_method": "rule_matched",
+      "confidence": 0.99,
+      "reason": "Matched the facility's MRN prefix and digit-length pattern; permanently removed."
+    },
+    {
+      "id": "span_14",
+      "text": "Hispanic",
+      "start": 624,
+      "end": 632,
+      "type": "ETHNICITY",
+      "decision": "kept_visible",
+      "mode": null,
+      "detection_method": "ai_judged",
+      "confidence": 0.61,
+      "reason": "Flagged as a protected demographic attribute; left visible because the surrounding text is a self-identification statement. Borderline — review."
+    }
+  ]
+}
