@@ -421,6 +421,40 @@ function ReviewPage({
 }) {
   const spanCount = effectiveSpans.length
 
+  const handleExport = () => {
+    let report = `Conseal Anonymization Report\n`
+    report += `============================\n\n`
+    report += `Confidence Threshold Applied: ${threshold.toFixed(2)}\n`
+    report += `Total Spans Detected: ${effectiveSpans.length}\n`
+    report += `Spans Redacted/Anonymized: ${redactedCount}\n`
+    report += `Spans Kept Visible: ${effectiveSpans.length - redactedCount}\n\n`
+    report += `--- SPAN AUDIT ---\n\n`
+
+    effectiveSpans.forEach((span, idx) => {
+      report += `[${idx + 1}] Text: "${span.text}"\n`
+      report += `    Type: ${span.type}\n`
+      report += `    Method: ${span.method === 'rule_matched' ? 'Rule layer (Regex)' : 'Judgment layer (Heuristics)'}\n`
+      report += `    Confidence: ${span.confidence.toFixed(2)}\n`
+      report += `    Final Decision: ${span.effectiveDecision.toUpperCase()} `
+      if (span.effectiveDecision === 'kept_visible') {
+        report += `(Reason: confidence below threshold of ${threshold.toFixed(2)})\n`
+      } else {
+        report += `(Mode: ${span.effectiveMode})\n`
+      }
+      report += `\n`
+    })
+
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'conseal_audit_report.txt'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       {/* ── Header ── */}
@@ -451,18 +485,30 @@ function ReviewPage({
           </div>
 
           {/* Right slot */}
-          {activeTab === 'document' ? (
-            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-accent-soft border border-accent/20 px-2.5 py-1 font-mono text-[11px] font-semibold text-accent">
-              {spanCount} spans
-            </span>
-          ) : (
+          <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={onBack}
-              className="cursor-target shrink-0 text-[12px] text-accent hover:underline underline-offset-2"
+              onClick={handleExport}
+              className="cursor-target inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.02] px-3 py-1 text-[11px] font-medium text-ink hover:border-accent/50 hover:text-accent hover:bg-white/[0.04] transition-colors"
             >
-              Back to Upload
+              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 2v5M4 5l3 3 3-3" />
+                <path d="M2 11h10" />
+              </svg>
+              Export Report
             </button>
-          )}
+            {activeTab === 'document' ? (
+              <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-accent-soft border border-accent/20 px-2.5 py-1 font-mono text-[11px] font-semibold text-accent">
+                {spanCount} spans
+              </span>
+            ) : (
+              <button
+                onClick={onBack}
+                className="cursor-target shrink-0 text-[12px] text-accent hover:underline underline-offset-2"
+              >
+                Back to Upload
+              </button>
+            )}
+          </div>
         </div>
       </header>
 

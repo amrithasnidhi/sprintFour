@@ -108,7 +108,7 @@ scale labels. Moving it calls `setThreshold` in `App.jsx`, which recomputes
 redacted"). All threshold re-evaluation runs synchronously on the client against the
 already-loaded span list -- no new API call is made per slider move.
 
-### Cleared / Audit panel
+### Cleared / Audit panel & Export
 
 The `ClearedPanel` lists all spans whose `effectiveDecision` is `kept_visible`. Each
 row shows a type-appropriate icon (person/document, location pin, calendar, shield), the
@@ -116,6 +116,10 @@ original text, the PII type and detection method suffix, and the confidence perc
 Clicking a row selects the span and switches the sidebar to the Explanation tab. When
 the threshold is high enough that every span is redacted, the panel shows an "Everything
 is redacted at this threshold" empty state with a green checkmark.
+
+Once the reviewer is satisfied with the threshold, they can click "Export Report" from the
+header to download a plain-text audit trail of every detection, its confidence, the applied
+threshold, and the final decision.
 
 ### Mode tags
 
