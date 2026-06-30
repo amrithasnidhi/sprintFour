@@ -13,7 +13,19 @@
       "Bash(python *)",
       "Bash(curl -s http://127.0.0.1:8000/api/spans/span_5)",
       "Bash(curl -s -o /dev/null -w \"html_status=%{http_code}\\\\n\" http://127.0.0.1:5173/)",
-      "Bash(curl -s -o /dev/null -w \"proxied_api_status=%{http_code}\\\\n\" http://127.0.0.1:5173/api/document)"
+      "Bash(curl -s -o /dev/null -w \"proxied_api_status=%{http_code}\\\\n\" http://127.0.0.1:5173/api/document)",
+      "Bash(curl -s http://127.0.0.1:8001/api/health)",
+      "Bash(curl -s http://127.0.0.1:8001/api/sample)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://127.0.0.1:5173/)",
+      "Bash(curl -s -o /dev/null -w \"proxied_sample=%{http_code}\\\\n\" http://127.0.0.1:5173/api/sample)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /PID 47008 /F)",
+      "Bash(taskkill /PID 33904 /F)",
+      "Bash(taskkill /PID 20560 /F)",
+      "PowerShell(Stop-Process *)",
+      "Bash(cmd /c \"taskkill /F /PID 37728\")",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(curl -s http://127.0.0.1:8002/api/sample)"
     ]
   }
 }

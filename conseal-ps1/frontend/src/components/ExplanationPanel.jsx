@@ -111,19 +111,19 @@ function KeptVisibleTag() {
 
 function DetectionTag({ method }) {
   const isRule = method === 'rule_matched'
+  const label = isRule ? 'Rule-matched' : 'Heuristic-judged'
+  const title = isRule
+    ? 'Deterministic — matched a strict regex pattern; confidence is genuinely earned'
+    : 'Heuristic judgment — name/location/demographic heuristic; confidence is intentionally softer'
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
         isRule ? 'text-emerald-700' : 'text-violet-700'
       }`}
-      title={
-        isRule
-          ? 'Deterministic — matched a strict pattern'
-          : 'Soft judgment — AI assessment'
-      }
+      title={title}
     >
       <DetectionIcon isRule={isRule} />
-      {isRule ? 'Rule-matched' : 'AI-judged'}
+      {label}
     </span>
   )
 }

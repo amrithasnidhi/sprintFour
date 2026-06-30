@@ -10,7 +10,7 @@ class PIISpan(BaseModel):
     type: str
     decision: Literal["redacted", "kept_visible"]
     mode: Optional[Literal["redact", "anonymize"]] = None
-    detection_method: Literal["rule_matched", "ai_judged"]
+    detection_method: Literal["rule_matched", "heuristic_judged", "ai_judged"]
     confidence: float
     reason: str
 

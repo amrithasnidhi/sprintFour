@@ -1,0 +1,23 @@
+PATIENT INTAKE FORM — MERIDIAN MEDICAL CENTER
+
+Patient: Jonathan M. Richardson
+DOB: March 14, 1978
+SSN: 287-41-9630
+
+Admitted: April 22, 2026
+Insurance Policy: BC-2847391-MH
+
+The patient is married and authorized release of PHI per HIPAA §164.506.
+
+Emergency Contact Phone: (415) 555-0142
+Primary Email: j.richardson@meridian-health.org
+
+Mailing Address: 1847 Divisadero St, San Francisco, CA 94115
+
+Attending Physician: Dr. Elena Vasquez (NPI 1093847562)
+Medical Record: MRN-008473
+
+Patient self-identifies as Hispanic.
+
+Notes: Patient was referred from St. Mary Medical Center in San Francisco.
+Previous insurer: AC-0044812-HX.

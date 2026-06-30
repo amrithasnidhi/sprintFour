@@ -3,37 +3,63 @@ import Wordmark from './components/Wordmark'
 import DocumentViewer from './components/DocumentViewer'
 import ExplanationPanel from './components/ExplanationPanel'
 import ConfidenceSlider from './components/ConfidenceSlider'
+import FileUpload from './components/FileUpload'
 import { applyThreshold } from './lib/spans'
 
 export default function App() {
-  const [status, setStatus] = useState('loading') // loading | ready | error
+  // 'loading' | 'ready' | 'uploading' | 'error'
+  const [status, setStatus] = useState('loading')
   const [docText, setDocText] = useState('')
   const [rawSpans, setRawSpans] = useState([])
   const [errorMsg, setErrorMsg] = useState('')
   const [selectedSpanId, setSelectedSpanId] = useState(null)
   const [threshold, setThreshold] = useState(0.5)
+  const [showUpload, setShowUpload] = useState(false)
 
-  const fetchDocument = async () => {
+  // On mount: fetch the built-in sample document through the real pipeline.
+  const fetchSample = async () => {
     setStatus('loading')
     setErrorMsg('')
+    setSelectedSpanId(null)
     try {
-      const res = await fetch('/api/document')
+      const res = await fetch('/api/sample')
       if (!res.ok) throw new Error(`API returned ${res.status}`)
       const data = await res.json()
       setDocText(data.document_text)
       setRawSpans(data.spans)
       setStatus('ready')
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to load document')
+      setErrorMsg(err.message || 'Failed to load sample document')
       setStatus('error')
     }
   }
 
-  useEffect(() => {
-    fetchDocument()
-  }, [])
+  useEffect(() => { fetchSample() }, [])
 
-  // Apply the threshold to every span; this is the live filter.
+  // Handle a user-uploaded file.
+  const handleUpload = async (file) => {
+    setStatus('uploading')
+    setErrorMsg('')
+    setSelectedSpanId(null)
+    setShowUpload(false)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/process', { method: 'POST', body: formData })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail || `Upload failed (${res.status})`)
+      }
+      const data = await res.json()
+      setDocText(data.document_text)
+      setRawSpans(data.spans)
+      setStatus('ready')
+    } catch (err) {
+      setErrorMsg(err.message || 'Upload failed')
+      setStatus('error')
+    }
+  }
+
   const effectiveSpans = useMemo(
     () => rawSpans.map((s) => applyThreshold(s, threshold)),
     [rawSpans, threshold]
@@ -56,10 +82,39 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           <BrandColumn />
 
-          <section className="lg:col-span-5">
+          <section className="lg:col-span-5 space-y-4">
+            {/* Upload toggle */}
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-muted">
+                {status === 'ready'
+                  ? `${rawSpans.length} spans detected · real pipeline`
+                  : status === 'uploading'
+                  ? 'Processing…'
+                  : ''}
+              </p>
+              {status !== 'uploading' && (
+                <button
+                  onClick={() => setShowUpload((v) => !v)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-rule bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-accent/50 hover:text-accent transition-colors"
+                >
+                  <svg viewBox="0 0 14 14" className="h-3 w-3" fill="none"
+                       stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M7 2v7M4 5l3-3 3 3" />
+                    <path d="M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" />
+                  </svg>
+                  {showUpload ? 'Hide upload' : 'Upload your own file'}
+                </button>
+              )}
+            </div>
+
+            {showUpload && (
+              <FileUpload onUpload={handleUpload} uploading={false} />
+            )}
+
             {status === 'loading' && <DocumentSkeleton />}
+            {status === 'uploading' && <UploadingCard />}
             {status === 'error' && (
-              <ErrorCard message={errorMsg} onRetry={fetchDocument} />
+              <ErrorCard message={errorMsg} onRetry={fetchSample} />
             )}
             {status === 'ready' && (
               <DocumentViewer
@@ -135,17 +190,24 @@ function BrandColumn() {
         Restore the real values from the mapping when you're done.
       </p>
 
-      <div className="mt-10 rounded-xl border border-rule bg-white p-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted mb-2">
-          What this prototype shows
+      <div className="mt-10 rounded-xl border border-rule bg-white p-5 space-y-3">
+        <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+          Two-stage detection
         </div>
-        <p className="text-[13px] text-ink/80 leading-relaxed">
-          A real person, not a developer, clicking on every redaction Conseal
-          made (and every one it didn't) and getting a clear, honest answer to{' '}
-          <em className="not-italic font-semibold text-ink">
-            why this, and why not that?
-          </em>
-        </p>
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 h-4 w-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[9px] font-bold shrink-0">1</span>
+          <div>
+            <p className="text-[12px] font-semibold text-ink">Rule layer</p>
+            <p className="text-[11px] text-muted">Regex for email, phone, SSN, policy numbers, dates, MRN, NPI. Deterministic — confidence 0.95–1.00.</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 h-4 w-4 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-[9px] font-bold shrink-0">2</span>
+          <div>
+            <p className="text-[12px] font-semibold text-ink">Judgment layer</p>
+            <p className="text-[11px] text-muted">Heuristics for names, locations, addresses, demographics. Softer — confidence 0.35–0.90.</p>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -158,11 +220,37 @@ function DocumentSkeleton() {
       <div className="skeleton h-6 w-2/3 mb-8" />
       <div className="space-y-3">
         {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="skeleton h-3"
-            style={{ width: `${70 + ((i * 13) % 25)}%` }}
-          />
+          <div key={i} className="skeleton h-3" style={{ width: `${70 + ((i * 13) % 25)}%` }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function UploadingCard() {
+  return (
+    <div className="rounded-2xl border border-rule bg-white shadow-panel p-8">
+      <div className="skeleton h-3 w-1/3 mb-3" />
+      <div className="space-y-4 mt-6">
+        {[
+          { label: 'Extracting text from file', done: true },
+          { label: 'Stage 1 — rule layer (regex)', done: true },
+          { label: 'Stage 2 — judgment layer (heuristics)', done: false },
+          { label: 'Merging and resolving overlaps', done: false },
+        ].map(({ label, done }) => (
+          <div key={label} className="flex items-center gap-3">
+            {done ? (
+              <div className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none"
+                     stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M2 6l3 3 5-6" />
+                </svg>
+              </div>
+            ) : (
+              <div className="h-5 w-5 rounded-full border-2 border-accent/30 border-t-accent animate-spin shrink-0" />
+            )}
+            <span className={`text-[14px] ${done ? 'text-ink' : 'text-muted'}`}>{label}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -172,19 +260,17 @@ function DocumentSkeleton() {
 function ErrorCard({ message, onRetry }) {
   return (
     <div className="rounded-2xl border border-red-200 bg-red-50 p-7 shadow-panel">
-      <h3 className="text-sm font-semibold text-red-800">
-        Couldn't load the document
-      </h3>
+      <h3 className="text-sm font-semibold text-red-800">Error</h3>
       <p className="mt-1.5 text-[13px] text-red-700">{message}</p>
       <p className="mt-2 text-[12px] text-red-600">
         Make sure the backend is running on{' '}
-        <code className="font-mono">http://127.0.0.1:8000</code>.
+        <code className="font-mono">http://127.0.0.1:8001</code>.
       </p>
       <button
         onClick={onRetry}
         className="mt-4 inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-[13px] font-medium text-white hover:bg-red-700"
       >
-        Retry
+        Retry with sample
       </button>
     </div>
   )
