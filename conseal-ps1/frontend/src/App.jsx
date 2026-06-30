@@ -184,7 +184,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, #0B0F19 100%)',
+          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, rgba(11, 15, 25, 0.4) 0%, #0B0F19 100%)',
         }}
       />
       {/* Bottom fade so the tab bar blends */}
@@ -222,15 +222,15 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
               <br />
               <span className="text-blue-400">Restore.</span>
             </h1>
-            <p className="text-white/50 text-[14px] leading-relaxed max-w-[32ch]">
+            <p className="text-white/80 text-[14px] leading-relaxed max-w-[32ch]">
               Swap PII for safe placeholders before any AI sees the file.
               Restore the real values when you are done.
             </p>
           </div>
 
           {/* Two-stage detection card — glass */}
-          <div className="rounded-xl border border-white/[0.10] bg-white/[0.05] backdrop-blur-sm p-5 space-y-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
+          <div className="rounded-xl border border-white/10 bg-[#0B0F19]/70 backdrop-blur-md p-5 space-y-3">
+            <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/60">
               Two-stage detection
             </div>
             <div className="flex items-start gap-2.5">
@@ -239,7 +239,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
               </span>
               <div>
                 <p className="text-[12px] font-semibold text-white/90">Rule layer</p>
-                <p className="text-[11px] text-white/40">
+                <p className="text-[11px] text-white/70">
                   Regex for email, phone, SSN, policy numbers, dates, MRN, NPI.
                   Deterministic — confidence 0.95–1.00.
                 </p>
@@ -251,7 +251,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
               </span>
               <div>
                 <p className="text-[12px] font-semibold text-white/90">Judgment layer</p>
-                <p className="text-[11px] text-white/40">
+                <p className="text-[11px] text-white/70">
                   Heuristics for names, locations, addresses, demographics. Softer —
                   confidence 0.35–0.90.
                 </p>
@@ -269,10 +269,10 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
               const file = e.dataTransfer.files?.[0]
               if (file && !isLoading) handle(file)
             }}
-            className={`rounded-2xl border-2 border-dashed p-8 text-center transition-all backdrop-blur-sm ${
+            className={`rounded-2xl border-2 border-dashed p-8 text-center transition-all backdrop-blur-md ${
               dragOver
-                ? 'border-accent/60 bg-accent/10'
-                : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                ? 'border-accent/60 bg-accent/20'
+                : 'border-white/20 bg-[#0B0F19]/70 hover:border-white/30 hover:bg-[#0B0F19]/90'
             }`}
           >
             <input
@@ -348,7 +348,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
                 </div>
                 <div>
                   <p className="text-[20px] font-bold text-white mb-1">Drop your file here</p>
-                  <p className="text-[13px] text-white/40">
+                  <p className="text-[13px] text-white/70">
                     PDF, DOCX, or plain text — up to 25 MB.
                   </p>
                 </div>
@@ -359,7 +359,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
                   + Choose File
                 </button>
                 {localError && <p className="text-[12px] text-red-400 -mt-2">{localError}</p>}
-                <button onClick={onSample} className="cursor-target text-[13px] text-blue-400/80 hover:text-blue-300 hover:underline underline-offset-2 transition-colors">
+                <button onClick={onSample} className="cursor-target text-[13px] text-white/70 hover:text-white hover:underline underline-offset-2 transition-colors mt-2">
                   Try a sample document →
                 </button>
               </div>
@@ -367,7 +367,7 @@ function UploadPage({ status, errorMsg, onUpload, onSample }) {
           </div>
 
           {/* Trust badges */}
-          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/20 text-center">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/40 text-center">
             AES-256 Encrypted · HIPAA Compliant · Zero Data Retention · V.2.4.0
           </p>
         </div>
