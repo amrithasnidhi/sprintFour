@@ -420,6 +420,7 @@ function ReviewPage({
   rawSpansCount,
 }) {
   const spanCount = effectiveSpans.length
+  const [compareMode, setCompareMode] = useState(false)
 
   const handleExport = () => {
     let report = `Conseal Anonymization Report\n`
@@ -519,23 +520,40 @@ function ReviewPage({
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
               {rawSpansCount} spans detected · real pipeline
             </p>
-            <button
-              onClick={onBack}
-              className="cursor-target inline-flex items-center gap-1.5 rounded-md border border-rule bg-white/[0.02] px-3 py-1 text-[11px] font-medium text-ink hover:border-accent/50 hover:text-accent hover:bg-white/[0.04] transition-colors shrink-0"
-            >
-              <svg
-                viewBox="0 0 14 14"
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Compare toggle — desktop only */}
+              <button
+                onClick={() => setCompareMode((c) => !c)}
+                className={`cursor-target hidden lg:inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-[11px] font-medium transition-colors ${
+                  compareMode
+                    ? 'border-accent/50 bg-accent/10 text-accent'
+                    : 'border-rule bg-white/[0.02] text-ink hover:border-accent/50 hover:text-accent hover:bg-white/[0.04]'
+                }`}
               >
-                <path d="M7 2v7M4 5l3-3 3 3" />
-                <path d="M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" />
-              </svg>
-              ↑ Upload your own
-            </button>
+                <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="2" width="5" height="10" rx="1" />
+                  <rect x="8" y="2" width="5" height="10" rx="1" />
+                </svg>
+                {compareMode ? 'Exit Compare' : 'Compare'}
+              </button>
+              <button
+                onClick={onBack}
+                className="cursor-target inline-flex items-center gap-1.5 rounded-md border border-rule bg-white/[0.02] px-3 py-1 text-[11px] font-medium text-ink hover:border-accent/50 hover:text-accent hover:bg-white/[0.04] transition-colors"
+              >
+                <svg
+                  viewBox="0 0 14 14"
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                >
+                  <path d="M7 2v7M4 5l3-3 3 3" />
+                  <path d="M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" />
+                </svg>
+                ↑ Upload your own
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -573,20 +591,45 @@ function ReviewPage({
           )}
         </div>
 
-        {/* Desktop: two columns */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-8">
-          {/* Left — document (always visible) */}
-          <section className="col-span-7">
-            <DocumentViewer
-              text={docText}
-              spans={effectiveSpans}
-              selectedSpanId={selectedSpanId}
-              onSelectSpan={onSelectSpan}
-            />
-          </section>
+        {/* Desktop: two columns (or three in compare mode) */}
+        <div
+          className="hidden lg:grid gap-6"
+          style={
+            compareMode
+              ? { gridTemplateColumns: '1fr 1fr 320px' }
+              : { gridTemplateColumns: '7fr 5fr' }
+          }
+        >
+          {compareMode ? (
+            /* Compare mode — original source | processed view */
+            <>
+              <section className="min-w-0">
+                <OriginalDocPanel text={docText} />
+              </section>
+              <section className="min-w-0">
+                <DocumentViewer
+                  text={docText}
+                  spans={effectiveSpans}
+                  selectedSpanId={selectedSpanId}
+                  onSelectSpan={onSelectSpan}
+                  compact
+                />
+              </section>
+            </>
+          ) : (
+            /* Normal mode — single document view */
+            <section className="min-w-0">
+              <DocumentViewer
+                text={docText}
+                spans={effectiveSpans}
+                selectedSpanId={selectedSpanId}
+                onSelectSpan={onSelectSpan}
+              />
+            </section>
+          )}
 
           {/* Right — tabbed panel */}
-          <aside className="col-span-5 sticky top-20 self-start">
+          <aside className="sticky top-20 self-start min-w-0">
             {/* Desktop tab row — pill style */}
             <div className="flex gap-1 bg-canvas border border-rule rounded-xl p-1 mb-4">
               <SidebarTab
@@ -713,6 +756,33 @@ function SidebarTab({ label, icon, active, onClick, badge }) {
         </span>
       )}
     </button>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Original document panel (compare mode)
+// ─────────────────────────────────────────────────────────────────────────────
+function OriginalDocPanel({ text }) {
+  return (
+    <article className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md shadow-xl overflow-hidden overflow-y-auto max-h-[calc(100vh-9rem)]">
+      <div className="h-[3px] bg-gradient-to-r from-slate-500/50 via-slate-400/30 to-slate-500/50" />
+      <div className="p-5">
+        <header className="mb-4 pb-3 border-b border-white/5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-2 w-2 rounded-full bg-slate-400/50" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
+              Original · Before scan
+            </span>
+          </div>
+          <h2 className="text-[17px] font-bold tracking-tight text-ink">
+            Source document
+          </h2>
+        </header>
+        <div className="font-mono text-[13px] leading-[1.85] text-ink/70 whitespace-pre-wrap break-words">
+          {text}
+        </div>
+      </div>
+    </article>
   )
 }
 

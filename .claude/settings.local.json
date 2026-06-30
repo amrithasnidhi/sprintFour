@@ -48,7 +48,8 @@
       "Bash(python -m uvicorn main:app --host 127.0.0.1 --port 8002)",
       "Bash(npm run *)",
       "Bash(taskkill //F //IM node.exe)",
-      "Bash(curl -s http://localhost:5173/)"
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl *)"
     ]
   }
 }

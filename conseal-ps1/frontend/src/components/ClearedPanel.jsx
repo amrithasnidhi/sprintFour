@@ -66,7 +66,6 @@ function typeIcon(type) {
     t.includes('HEALTHCARE') ||
     t.includes('FACILITY')
   ) {
-    // Document / person icon
     return (
       <svg
         viewBox="0 0 16 16"
@@ -84,7 +83,6 @@ function typeIcon(type) {
     )
   }
   if (t.includes('LOCATION') || t.includes('ADDRESS') || t.includes('CITY') || t.includes('STATE')) {
-    // Location pin icon
     return (
       <svg
         viewBox="0 0 16 16"
@@ -102,7 +100,6 @@ function typeIcon(type) {
     )
   }
   if (t.includes('DATE') || t.includes('DOB') || t.includes('BIRTH')) {
-    // Calendar icon
     return (
       <svg
         viewBox="0 0 16 16"
@@ -119,7 +116,6 @@ function typeIcon(type) {
       </svg>
     )
   }
-  // Default: shield icon
   return (
     <svg
       viewBox="0 0 16 16"
