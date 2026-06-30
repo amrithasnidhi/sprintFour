@@ -4,9 +4,8 @@ import { tokenFor } from '../lib/spans'
  * Renders a single inline PII span. Three distinct visual treatments:
  *  - `redact` mode    → solid dark block with lock glyph (the hidden text
  *                       still occupies its full width so layout doesn't shift)
- *  - `anonymize` mode → monospace pill like [NAME_1] (the original text
- *                       length is no longer preserved; this matches how the
- *                       real Conseal pipeline emits substitution tokens)
+ *  - `anonymize` mode → monospace pill like [NAME_1] (rule_matched = solid
+ *                       border; heuristic_judged = dashed border)
  *  - kept_visible     → original text with a dotted blue underline
  */
 export default function SpanHighlight({ span, onSelect, isSelected }) {
@@ -23,7 +22,7 @@ export default function SpanHighlight({ span, onSelect, isSelected }) {
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick(e)}
-        className={`kept-visible ${selectedClass}`}
+        className={`cursor-target kept-visible ${selectedClass}`}
         title="Considered and kept visible — click for reasoning"
       >
         {span.text}
@@ -38,7 +37,7 @@ export default function SpanHighlight({ span, onSelect, isSelected }) {
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick(e)}
-        className={`redact-block ${selectedClass}`}
+        className={`cursor-target redact-block ${selectedClass}`}
         title="Permanently removed — click to see why"
         aria-label={`Redacted ${span.type}`}
       >
@@ -48,14 +47,19 @@ export default function SpanHighlight({ span, onSelect, isSelected }) {
     )
   }
 
-  // anonymize mode
+  // anonymize mode — rule_matched gets solid border, heuristic_judged gets dashed
+  const pillClass =
+    span.detection_method === 'heuristic_judged'
+      ? 'anonymize-pill-heuristic'
+      : 'anonymize-pill'
+
   return (
     <span
       role="button"
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick(e)}
-      className={`anonymize-pill ${selectedClass}`}
+      className={`cursor-target ${pillClass} ${selectedClass}`}
       title="Anonymized — recoverable via map. Click for details."
     >
       {tokenFor(span)}

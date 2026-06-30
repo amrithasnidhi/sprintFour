@@ -1,0 +1,20 @@
+.scroll-reveal {
+  margin: 0;
+}
+
+.scroll-reveal-text {
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.word {
+  display: inline-block;
+}
+
+.scroll-reveal-brand {
+  font-size: 15px;
+  line-height: 1.7;
+  font-weight: 400;
+  color: inherit;
+}

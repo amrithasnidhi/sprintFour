@@ -12,80 +12,97 @@ export default function ExplanationPanel({ span }) {
 
   return (
     <section
-      className="rounded-2xl border border-rule bg-white shadow-panel p-6 sm:p-7"
+      className="rounded-2xl border border-rule bg-white shadow-panel overflow-hidden"
       aria-live="polite"
     >
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Decision
-        </span>
-        <DetectionTag method={span.detection_method} />
-      </div>
-
-      <div className="flex items-center flex-wrap gap-2 mb-3">
-        <TypeBadge type={span.type} />
-        {isRedacted && <ModeTag mode={span.effectiveMode} />}
-        {!isRedacted && <KeptVisibleTag />}
-      </div>
-
-      <div className="mb-5">
-        <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1">
-          Span
-        </div>
-        <div className="font-mono text-[13px] bg-canvas border border-rule rounded-lg px-3 py-2 text-ink break-all">
-          {isRedacted && span.effectiveMode === 'anonymize' ? (
-            <>
-              <span className="text-accent font-semibold">{tokenFor(span)}</span>
-              <span className="text-muted"> ← {span.text}</span>
-            </>
-          ) : isRedacted ? (
-            <span className="text-muted">[redacted — {span.text.length} chars]</span>
-          ) : (
-            <span>{span.text}</span>
-          )}
+      {/* Gradient header band */}
+      <div className="bg-gradient-to-br from-accent/[0.07] to-violet-50/60 border-b border-rule px-6 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent font-semibold">
+            Detection Reasoning
+          </span>
+          <DetectionTag method={span.detection_method} />
         </div>
       </div>
 
-      <div className="mb-5">
-        <ConfidenceBar value={span.confidence} />
-      </div>
-
-      <div className="mb-2">
-        <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1.5">
-          Why this decision
+      <div className="p-6 sm:p-7">
+        <div className="flex items-center flex-wrap gap-2 mb-4">
+          <TypeBadge type={span.type} />
+          {isRedacted && <ModeTag mode={span.effectiveMode} />}
+          {!isRedacted && <KeptVisibleTag />}
         </div>
-        <p className="text-[14px] leading-relaxed text-ink/90">{span.reason}</p>
-      </div>
 
-      {userOverrode && (
-        <div className="mt-4 pt-4 border-t border-rule">
+        <div className="mb-5">
           <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1">
-            Your threshold changed this
+            Span
           </div>
-          <p className="text-[12px] text-ink/70">
-            Conseal originally chose{' '}
-            <strong className="text-ink">{span.originalDecision.replace('_', ' ')}</strong>
-            . At your current threshold, this span is{' '}
-            <strong className="text-ink">{span.effectiveDecision.replace('_', ' ')}</strong>.
-          </p>
+          <div className="font-mono text-[13px] bg-canvas border border-rule rounded-lg px-3 py-2 text-ink break-all">
+            {isRedacted && span.effectiveMode === 'anonymize' ? (
+              <>
+                <span className="text-accent font-semibold">{tokenFor(span)}</span>
+                <span className="text-muted"> ← {span.text}</span>
+              </>
+            ) : isRedacted ? (
+              <span className="text-muted">[redacted — {span.text.length} chars]</span>
+            ) : (
+              <span>{span.text}</span>
+            )}
+          </div>
         </div>
-      )}
+
+        <div className="mb-5">
+          <ConfidenceBar value={span.confidence} />
+        </div>
+
+        <div className="mb-2">
+          <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1.5">
+            Why this decision
+          </div>
+          <p className="text-[14px] leading-relaxed text-ink/90">{span.reason}</p>
+        </div>
+
+        {userOverrode && (
+          <div className="mt-4 pt-4 border-t border-rule">
+            <div className="text-[11px] uppercase tracking-[0.08em] text-muted mb-1">
+              Your threshold changed this
+            </div>
+            <p className="text-[12px] text-ink/70">
+              Conseal originally chose{' '}
+              <strong className="text-ink">{span.originalDecision.replace('_', ' ')}</strong>
+              . At your current threshold, this span is{' '}
+              <strong className="text-ink">{span.effectiveDecision.replace('_', ' ')}</strong>.
+            </p>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
 
 function EmptyState() {
   return (
-    <section className="rounded-2xl border border-dashed border-rule bg-white/60 p-7 text-center">
-      <div className="mx-auto h-10 w-10 rounded-full bg-accent-soft flex items-center justify-center mb-3">
-        <span className="text-accent text-lg">?</span>
+    <section className="rounded-2xl border border-dashed border-rule bg-white p-8 text-center">
+      <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-accent/10 to-violet-100/80 border border-accent/15 flex items-center justify-center mb-4">
+        <svg
+          viewBox="0 0 20 20"
+          className="h-7 w-7 text-accent"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="8.5" cy="8.5" r="5.5" />
+          <path d="m13 13 3.5 3.5" />
+          <path d="M8.5 6.5v4M6.5 8.5h4" />
+        </svg>
       </div>
-      <h3 className="text-sm font-semibold text-ink">
-        Click any highlighted or underlined text
+      <h3 className="text-[15px] font-semibold text-ink mb-1.5">
+        Select a span to inspect
       </h3>
-      <p className="text-[13px] text-muted mt-1.5 leading-relaxed">
-        Every decision has a reason. Both the things we hid and the things we
-        deliberately kept visible.
+      <p className="text-[13px] text-muted leading-relaxed max-w-[24ch] mx-auto">
+        Click any highlighted token in the document to see the full detection reasoning.
       </p>
     </section>
   )

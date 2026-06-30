@@ -43,21 +43,42 @@ def _span(text, start, end, typ, decision, mode, confidence, reason) -> dict:
 _EMAIL_RE = re.compile(
     r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b"
 )
+# Catches emails missing the TLD when the provider is a well-known name
+# (common in PDF extraction where ".com" lands in a separate text run).
+_EMAIL_PARTIAL_RE = re.compile(
+    r"\b([A-Za-z0-9._%+\-]+@(?:gmail|yahoo|hotmail|outlook|protonmail|icloud|rediffmail|ymail))\b",
+    re.IGNORECASE,
+)
 
 def _detect_emails(text: str) -> list[dict]:
     spans = []
+    seen: set[tuple[int, int]] = set()
     for m in _EMAIL_RE.finditer(text):
         spans.append(_span(
             m.group(), m.start(), m.end(),
-            "EMAIL", "redacted", "anonymize", 0.99,
+            "EMAIL", "redacted", "redact", 0.99,
             "Matched the standard email regex (local-part@domain.tld); "
-            "anonymized with a recoverable token so referential identity is preserved."
+            "permanently removed — an AI processing this document does not need "
+            "to echo the literal email address back in its output."
         ))
+        seen.add((m.start(), m.end()))
+    for m in _EMAIL_PARTIAL_RE.finditer(text):
+        if (m.start(), m.end()) not in seen:
+            spans.append(_span(
+                m.group(1), m.start(1), m.end(1),
+                "EMAIL", "redacted", "redact", 0.97,
+                "Matched a known email provider handle without a TLD suffix "
+                "(common in PDF extraction); permanently removed."
+            ))
     return spans
 
 
 _PHONE_RE = re.compile(
     r"\(?\b(\d{3})\)?[-.\s](\d{3})[-.\s](\d{4})\b"
+)
+# Indian phone: +91 followed by 10 digits (5+5 or 10 consecutive)
+_INDIAN_PHONE_RE = re.compile(
+    r"(?:\+91|0091)[\s\-]?(\d{5})[\s\-]?(\d{5})\b"
 )
 
 def _detect_phones(text: str) -> list[dict]:
@@ -65,9 +86,16 @@ def _detect_phones(text: str) -> list[dict]:
     for m in _PHONE_RE.finditer(text):
         spans.append(_span(
             m.group(), m.start(), m.end(),
-            "PHONE_NUMBER", "redacted", "anonymize", 0.99,
-            "Matched the standard US phone format (area-code + 7 digits); "
-            "anonymized with a recoverable token."
+            "PHONE_NUMBER", "redacted", "redact", 0.99,
+            "Matched a phone number; permanently removed — an AI summarising or "
+            "rewriting a résumé does not need the literal number in its output."
+        ))
+    for m in _INDIAN_PHONE_RE.finditer(text):
+        spans.append(_span(
+            m.group(), m.start(), m.end(),
+            "PHONE_NUMBER", "redacted", "redact", 0.99,
+            "Matched an Indian mobile number (+91 country-code prefix + 10 digits); "
+            "permanently removed."
         ))
     return spans
 
@@ -273,6 +301,123 @@ def _detect_dates(text: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# ACADEMIC SCORE — CGPA/GPA and labelled percentage
+# These uniquely identify a student's record.
+# ---------------------------------------------------------------------------
+
+_CGPA_RE = re.compile(
+    r"\b((?:CGPA|GPA)\s*[:\s]\s*\d+(?:\.\d{1,2}))\b",
+    re.IGNORECASE,
+)
+_ACADEMIC_PCT_RE = re.compile(
+    r"\b(Percentage\s*[-–:]\s*\d+(?:\.\d{1,2})?%?)",
+    re.IGNORECASE,
+)
+
+
+def _detect_academic_scores(text: str) -> list[dict]:
+    spans = []
+    for m in _CGPA_RE.finditer(text):
+        spans.append(_span(
+            m.group(1), m.start(1), m.end(1),
+            "ACADEMIC_SCORE", "kept_visible", None, 0.45,
+            "Matched a CGPA/GPA score. Academic grades are graded performance data, "
+            "not a direct personal identifier — deliberately left unredacted. "
+            "An AI tool working on this résumé needs the grade to remain visible "
+            "to preserve the document's meaning."
+        ))
+    for m in _ACADEMIC_PCT_RE.finditer(text):
+        spans.append(_span(
+            m.group(1), m.start(1), m.end(1),
+            "ACADEMIC_SCORE", "kept_visible", None, 0.45,
+            "Matched a labelled academic percentage. Performance scores are context data, "
+            "not personal identifiers — deliberately left unredacted."
+        ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
+# PROFILE_URL — GitHub and LinkedIn profile URLs
+# Anonymized (not permanently removed) because the AI may need to reference
+# the link structure (e.g., format a links section) and the person will want
+# the URL restored in the final output.
+# ---------------------------------------------------------------------------
+
+_GITHUB_URL_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?github\.com/([A-Za-z0-9][A-Za-z0-9\-]{0,38})\b",
+    re.IGNORECASE,
+)
+_LINKEDIN_URL_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?linkedin\.com/in/([A-Za-z0-9][A-Za-z0-9\-]{0,38})\b",
+    re.IGNORECASE,
+)
+
+
+def _detect_profile_urls(text: str) -> list[dict]:
+    spans = []
+    for m in _GITHUB_URL_RE.finditer(text):
+        full = m.group(0)
+        spans.append(_span(
+            full, m.start(), m.start() + len(full),
+            "PROFILE_URL", "redacted", "anonymize", 0.98,
+            "Matched a GitHub profile URL; anonymized with a recoverable token so "
+            "the link structure can be restored in the AI's output."
+        ))
+    for m in _LINKEDIN_URL_RE.finditer(text):
+        full = m.group(0)
+        spans.append(_span(
+            full, m.start(), m.start() + len(full),
+            "PROFILE_URL", "redacted", "anonymize", 0.98,
+            "Matched a LinkedIn profile URL; anonymized with a recoverable token so "
+            "the link structure can be restored in the AI's output."
+        ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
+# SOCIAL_HANDLE — LinkedIn / GitHub style kebab-case handles
+# Pattern: lowercase alphanumeric+hyphen, at least 3 hyphens, at least one digit
+# (the auto-generated suffix is a strong discriminator from ordinary compound words).
+# ---------------------------------------------------------------------------
+
+_SOCIAL_HANDLE_RE = re.compile(
+    r"\b([a-z][a-z0-9\-]{7,49})\b"
+)
+# Catches plain usernames that follow a PDF bullet artifact "(cid:N)" —
+# common when a resume uses a special separator glyph between contact handles.
+_CID_HANDLE_RE = re.compile(
+    r"\(cid:\d+\)\s+([a-z][a-z0-9]{4,39})\b"
+)
+
+
+def _detect_social_handles(text: str) -> list[dict]:
+    spans = []
+    seen: set[tuple[int, int]] = set()
+    for m in _SOCIAL_HANDLE_RE.finditer(text):
+        handle = m.group(1)
+        # Require 3+ hyphens AND at least one digit (eliminates "state-of-the-art" etc.)
+        if handle.count('-') >= 3 and any(c.isdigit() for c in handle):
+            spans.append(_span(
+                handle, m.start(1), m.end(1),
+                "SOCIAL_HANDLE", "redacted", "anonymize", 0.82,
+                "Matched a kebab-case handle with a numeric suffix (typical LinkedIn/GitHub "
+                "auto-generated URL slug); anonymized to prevent profile enumeration."
+            ))
+            seen.add((m.start(1), m.end(1)))
+    # Catch plain usernames that appear after a PDF bullet artifact
+    for m in _CID_HANDLE_RE.finditer(text):
+        s, e = m.start(1), m.end(1)
+        if (s, e) not in seen:
+            spans.append(_span(
+                m.group(1), s, e,
+                "SOCIAL_HANDLE", "redacted", "anonymize", 0.85,
+                "Matched a username immediately following a PDF separator glyph (cid:N) — "
+                "consistent with a social media handle in a resume contact line. Anonymized."
+            ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
 # Public interface
 # ---------------------------------------------------------------------------
 
@@ -289,12 +434,15 @@ def detect(text: str) -> list[dict]:
         _detect_emails,
         _detect_phones,
         _detect_ssns,
-        _detect_mrns,       # before policy — more specific
-        _detect_npis,       # before policy — more specific
-        _detect_hipaa,      # before policy — more specific
+        _detect_mrns,            # before policy — more specific
+        _detect_npis,            # before policy — more specific
+        _detect_hipaa,           # before policy — more specific
         _detect_credit_cards,
         _detect_policy_numbers,  # generic; runs last to avoid shadowing the above
         _detect_dates,
+        _detect_academic_scores,
+        _detect_profile_urls,   # github.com/user and linkedin.com/in/user
+        _detect_social_handles,
     ):
         results.extend(fn(text))
     return results

@@ -36,6 +36,14 @@ body {
   @apply ring-2 ring-accent ring-offset-1 ring-offset-canvas;
 }
 
+/* Heuristic anonymize pill — dashed border variant for heuristic_judged spans. */
+.anonymize-pill-heuristic {
+  @apply inline-flex items-center bg-accent-soft text-accent border border-dashed border-accent/40 rounded-md px-1.5 py-0 mx-[1px] font-mono text-[0.9em] cursor-pointer;
+}
+.anonymize-pill-heuristic:hover {
+  @apply ring-2 ring-accent ring-offset-1 ring-offset-canvas;
+}
+
 /* Kept-visible-but-flagged — dotted underline in the accent color. */
 .kept-visible {
   @apply cursor-pointer;

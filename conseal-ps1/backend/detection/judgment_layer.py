@@ -65,6 +65,48 @@ def _detect_titled_names(text: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# ALL-CAPS RESUME NAME — catches "AMRITHA S NIDHI" (name as header)
+#
+# Pattern: a whole line consisting of 2+ all-caps words where at least two
+# words are 3+ chars (to rule out section headers like "TECHNICAL SKILLS"
+# which share the same structure but are caught by `_SECTION_WORDS`).
+# ---------------------------------------------------------------------------
+
+_ALLCAPS_RESUME_NAME_RE = re.compile(
+    r"^([A-Z]{2,}(?:\s+[A-Z]{1,2}){0,2}\s+[A-Z]{2,})\s*$",
+    re.MULTILINE,
+)
+
+_SECTION_WORDS: frozenset[str] = frozenset({
+    "SUMMARY", "EDUCATION", "EXPERIENCE", "PROJECTS", "SKILLS",
+    "ACHIEVEMENTS", "CERTIFICATIONS", "PUBLICATIONS", "INTERESTS",
+    "REFERENCES", "CONTACT", "OBJECTIVE", "TECHNICAL", "WORK",
+    "AWARDS", "PROFILE", "ABOUT", "OVERVIEW",
+})
+
+
+def _detect_allcaps_resume_names(text: str) -> list[dict]:
+    spans = []
+    for m in _ALLCAPS_RESUME_NAME_RE.finditer(text):
+        matched = m.group(1)
+        words = matched.split()
+        if any(w in _SECTION_WORDS for w in words):
+            continue
+        # Need at least two "real" words (3+ chars) so "A B" doesn't match
+        long_words = [w for w in words if len(w) >= 3]
+        if len(long_words) < 2:
+            continue
+        spans.append(_span(
+            matched, m.start(1), m.end(1),
+            "PERSON_NAME", "redacted", "anonymize", 0.83,
+            "All-caps name occupying its own line — consistent with a résumé or "
+            "letterhead header style. Classified as a person name and anonymized "
+            "with a recoverable token.",
+        ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
 # ALL-CAPS TITLED NAME — catches "DR. SARAH CHEN", "MR. JAMES HOLLOWAY"
 # (letterhead / header style where everything is uppercase)
 # ---------------------------------------------------------------------------
@@ -106,7 +148,7 @@ def _detect_allcaps_names(text: str) -> list[dict]:
 
 _NAME_SEQ_RE = re.compile(
     r"(?<![A-Za-z])"                     # not preceded by a letter
-    r"([A-Z][a-z]{1,}\s+(?:[A-Z]\.\s+)?(?:[A-Z][a-z']{1,}\s+)?[A-Z][a-z']{1,})"
+    r"([A-Z][a-z]{1,}[^\S\n]+(?:[A-Z]\.[^\S\n]+)?(?:[A-Z][a-z']{1,}[^\S\n]+)?[A-Z][a-z']{1,})"
     r"(?![A-Za-z])"                      # not followed by a letter
 )
 
@@ -126,23 +168,97 @@ _NON_NAME: frozenset[str] = frozenset({
     "Patient", "Medical", "Center", "Hospital", "Clinic", "Health", "Care",
     "Confidentiality", "Form", "Report", "Record", "Services",
     "Inc", "Llc", "Ltd", "Corp", "Co",
-    # Place modifiers that start with caps but aren't names on their own
+    # Place modifiers
     "San", "Los", "New", "Las", "Fort", "Saint", "Santa",
     "North", "South", "East", "West",
     # HIPAA / legal
     "Hipaa", "Phi", "Privacy",
-    # Form structural words
+    # Healthcare form structural words
     "Attending", "Primary", "Designated", "Emergency", "Contact",
     "Insurance", "Policy", "Mailing", "Address", "Date", "Record",
     "Coverage", "Admission",
-    # Letter salutations — "Dear Dr" would otherwise score as a 2-word name
+    # Letter salutations
     "Dear", "Sincerely", "Regards", "Hello", "Hi",
-    # Demographic / nationality adjectives that commonly form 2-word phrases
-    # ("African American", "Asian American", etc.) — these must be caught by
-    # the ETHNICITY detector, not the name heuristic.
+    # Demographic / nationality adjectives
     "African", "Asian", "European", "Latino", "Latina", "Latinx",
     "Hispanic", "Pacific", "Native", "Alaska", "Biracial", "Multiracial",
-    "American",   # only penalises compound terms; single "American" is rarely a name
+    "American",
+    # ---------------------------------------------------------------
+    # CS / technology / software terms
+    # These appear as title-case pairs in technical docs and resumes
+    # but are never person names.
+    # ---------------------------------------------------------------
+    "Algorithm", "Analytics", "Analysis", "Api", "Apis",
+    "Application", "Applications", "Architecture", "Automation",
+    "Backend", "Cloud", "Code", "Computer", "Configuration",
+    "Data", "Database", "Databases", "Dashboard", "Development",
+    "Docker", "Engineering", "Excel", "Exploratory",
+    "Feature", "Forest", "Framework", "Frontend", "Fullstack",
+    "Genetic", "Integration", "Interface", "Jupyter",
+    "Kubernetes", "Language", "Languages", "Learning",
+    "Logistic", "Machine", "Microservices", "Modeling",
+    "Network", "Neural", "Notebook", "Pipeline", "Platform",
+    "Predictive", "Programming", "Random", "Regression",
+    "Repository", "Science", "Search", "Software", "Stack",
+    "System", "Systems", "Technology", "Technologies", "Toolkit", "Tools",
+    # ---------------------------------------------------------------
+    # Resume structural / job-title words
+    # ---------------------------------------------------------------
+    "Analyst", "Associate", "Bachelor", "Certifications",
+    "Developer", "Director", "Education", "Engineer", "Experience",
+    "Graduate", "Intern", "Internship", "Manager", "Master",
+    "Officer", "Present", "Remote", "Resume", "Skills",
+    "Specialist", "Summary", "Trainee", "Undergraduate",
+    # ---------------------------------------------------------------
+    # Educational institution words
+    # ---------------------------------------------------------------
+    "Academy", "College", "Institute", "Public", "School",
+    "University", "Vidyapeetham", "Vishwa",
+    # ---------------------------------------------------------------
+    # Indian geography — prevents Indian city/state names from being
+    # tagged as PERSON_NAME (they are handled by the location detector)
+    # ---------------------------------------------------------------
+    "Alappuzha", "Bengal", "Bengaluru", "Bihar", "Chennai",
+    "Coimbatore", "Gujarat", "Haryana", "India", "Karnataka",
+    "Kerala", "Nadu", "Pattanakad", "Pradesh", "Punjab",
+    "Rajasthan", "Tamil",
+    # ---------------------------------------------------------------
+    # Business / analytics / achievement vocabulary
+    # ---------------------------------------------------------------
+    "Business", "Council", "Finalist", "Foundation", "Group",
+    "Hackathon", "Insights", "Local", "Management", "Projects",
+    "Reporting", "Society", "Team", "Tier", "United", "Youth",
+    # Additional tech/resume terms seen as false positives
+    "Based", "Built", "Constraint", "Fabric", "Hyperledger",
+    "Optimization", "Power", "Scale", "Soar", "Stage", "Timetable",
+    "Tableau", "Streamlit", "Visualization", "Interactive",
+    # ---------------------------------------------------------------
+    # Project subtitle / tech descriptor words
+    # These appear as title-case pairs in project title lines and
+    # certification headers but are never person names.
+    # ---------------------------------------------------------------
+    "Async", "Concurrent", "Detection", "Distributed", "Encrypted",
+    "Forensic", "Hybrid", "Inference", "Ingestion", "Intrusion",
+    "Parametric", "Parallel", "Powered", "Protocol",
+    "Reasoning", "Recommendation", "Secure", "Semantic",
+    "Sequential", "Streaming", "Synthesis",
+    "Real", "Time", "Chat", "Voice", "Audio", "Video",
+    # Certification / course terminology
+    "Certificate", "Certification", "Pathway", "Bootcamp",
+    "Curriculum", "Forage", "Workshop", "Training",
+    # Organization suffixes
+    "Associates", "Consulting", "Solutions", "Digital",
+    # Extra resume structural terms
+    "Applied", "Application", "Close", "Closer",
+    "Identification", "Implementation", "Processing", "Segmentation",
+    "Job", "Simulation", "Virtual", "Experience",
+    "Payment", "Orchestration", "Gateway", "Platform", "Service", "System",
+    # ---------------------------------------------------------------
+    # Common English function words that start with a capital mid-sentence
+    # (e.g. "Council Of India" — "Of" would otherwise extend a name match)
+    # ---------------------------------------------------------------
+    "An", "And", "As", "At", "By", "For", "In", "Of",
+    "On", "Or", "Per", "The", "To", "Via", "With",
 })
 
 
@@ -219,6 +335,14 @@ _CITIES: frozenset[str] = frozenset({
     "United States", "United Kingdom", "Canada", "Australia", "India",
     "France", "Germany", "Japan", "China", "Brazil", "Mexico", "Italy",
     "Spain", "Russia", "Netherlands", "Sweden", "Norway", "Denmark",
+    # Indian states and major cities
+    "Tamil Nadu", "Kerala", "Karnataka", "Maharashtra", "Gujarat",
+    "Rajasthan", "West Bengal", "Andhra Pradesh", "Telangana",
+    "Uttar Pradesh", "Madhya Pradesh", "Bihar", "Punjab", "Haryana",
+    "Bengaluru", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune",
+    "Ahmedabad", "Jaipur", "Lucknow", "Surat", "Kanpur", "Nagpur",
+    "Coimbatore", "Kochi", "Alappuzha", "Thiruvananthapuram", "Mysuru",
+    "Visakhapatnam", "Vijayawada", "Patna", "Bhopal", "Indore",
 })
 
 # Sort by length descending so longer multi-word city names match before substrings
@@ -244,7 +368,7 @@ def _detect_locations(text: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 _ADDRESS_RE = re.compile(
-    r"\b(\d{1,5}\s+[A-Za-z][a-zA-Z\s]{2,35}"
+    r"\b(\d{1,5}[^\S\n]+[A-Za-z][a-zA-Z ]{2,35}"
     r"(?:Street|St|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Road|Rd|"
     r"Lane|Ln|Way|Court|Ct|Place|Pl|Circle|Highway|Hwy|Pkwy|Parkway)\b"
     r"(?:[^0-9\n\r]{0,50}\d{5}(?:-\d{4})?)?)",
@@ -273,7 +397,7 @@ def _detect_addresses(text: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 _MARITAL_RE = re.compile(
-    r"\b(married|single|divorced|widowed|separated|domestic\s+partnership)\b",
+    r"\b(married|single|divorced|widowed|domestic\s+partnership)\b",
     re.IGNORECASE,
 )
 
@@ -331,10 +455,11 @@ _FACILITY_KEYWORDS = (
     r"HEALTH\s+(?:SYSTEM|NETWORK|CENTER|CARE)|"
     r"CLINIC(?:S)?|HEALTHCARE|INFIRMARY"
 )
-# No IGNORECASE — [A-Z] must be uppercase so we don't start matching at lowercase words
+# No IGNORECASE — [A-Z] must be uppercase so we don't start matching at lowercase words.
+# (?<!-) ensures we don't pick up the tail of a compound word like "Full-Stack".
 _FACILITY_RE = re.compile(
-    r"\b([A-Z][A-Za-z'.]{0,30}"           # first word starts with a capital
-    r"(?:\s+[A-Z][A-Za-z'.]{0,19}){0,4}"  # optional extra capitalized words
+    r"(?<!-)(?<!\w)\b([A-Z][A-Za-z'.]{1,30}"  # first word starts with a capital (≥2 chars)
+    r"(?:\s+[A-Z][A-Za-z'.]{0,19}){0,4}"       # optional extra capitalized words
     r"\s+(?:" + _FACILITY_KEYWORDS + r"))\b"
 )
 
@@ -343,8 +468,14 @@ def _detect_facilities(text: str) -> list[dict]:
     spans = []
     for m in _FACILITY_RE.finditer(text):
         matched = m.group(1)
-        # Skip if the name is too short (avoids "The Clinic"-style false positives)
-        if len(matched.split()) < 2:
+        words = matched.split()
+        # Skip single-word matches
+        if len(words) < 2:
+            continue
+        # Skip when the first word is a short all-caps abbreviation like "AI", "IT", "ML"
+        # — these are technology terms, not facility name prefixes.
+        first = words[0].rstrip(".'")
+        if first.isupper() and len(first) <= 3:
             continue
         spans.append(_span(
             matched, m.start(), m.start() + len(matched),
@@ -413,6 +544,147 @@ def _detect_health_info(text: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# ORGANIZATION — employer names and educational institutions in resume format
+#
+# Strategy: in a résumé, each job and school entry starts a new line with the
+# organization name followed (on the same line) by a month + 4-digit year.
+# Examples:
+#   FideltaV April 2026 – Present
+#   Amrita Vishwa Vidyapeetham August 2023 – Present
+#   St. Joseph Public School, Pattanakad June 2011 – March 2023
+#
+# We capture everything before the month as the organization name.
+# ---------------------------------------------------------------------------
+
+_MONTHS_PAT = (
+    r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?"
+    r"|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
+)
+_ORG_DATE_RE = re.compile(
+    r"^([A-Za-z][A-Za-z0-9 &',.\-]{0,70}?)\s+" + _MONTHS_PAT + r"[\s.]+\d{4}",
+    re.MULTILINE,
+)
+
+_ORG_SECTION_HEADERS: frozenset[str] = frozenset({
+    "SUMMARY", "EDUCATION", "EXPERIENCE", "PROJECTS", "SKILLS",
+    "ACHIEVEMENTS", "CERTIFICATIONS", "PUBLICATIONS", "INTERESTS",
+    "REFERENCES", "CONTACT", "OBJECTIVE", "TECHNICAL", "WORK", "AWARDS",
+})
+
+_DEGREE_PREFIX_RE = re.compile(
+    r"^(?:B\.?|M\.?|Ph\.?D?|MBA|BE|ME|BSc|MSc|BCA|MCA|BBA|BEng|MEng"
+    r"|Bachelor|Master|Doctor|Diploma)\b",
+    re.IGNORECASE,
+)
+
+
+def _detect_organizations(text: str) -> list[dict]:
+    spans = []
+    for m in _ORG_DATE_RE.finditer(text):
+        name = m.group(1).strip(" ,.")
+        if not name or name.upper() in _ORG_SECTION_HEADERS:
+            continue
+        if len(name) < 3:
+            continue
+        # Skip short all-caps exam/board acronyms (SSLC, HSC, CBSE, SSC …)
+        if name == name.upper() and len(name.replace(" ", "")) <= 6:
+            continue
+        # Skip degree lines that incidentally contain a month-year
+        if _DEGREE_PREFIX_RE.match(name):
+            continue
+        spans.append(_span(
+            name, m.start(1), m.start(1) + len(name),
+            "ORGANIZATION", "redacted", "anonymize", 0.88,
+            f"Matched '{name}' as an organization name (employer or educational institution) "
+            "in a résumé entry — the line starts with the organization and ends with a month/year. "
+            "Anonymized to prevent identification through employment/education history.",
+        ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
+# EDUCATIONAL_INSTITUTION — school and university names when not on a date-line
+#
+# Catches names like "Amrita School of Engineering" or "MIT" that appear
+# on their own line (no trailing date), using well-known institution suffixes.
+# ---------------------------------------------------------------------------
+
+_EDU_SUFFIX_RE = re.compile(
+    r"\b([A-Z][A-Za-z'.]+(?:[^\S\n]+[A-Za-z'.]+){0,5}"
+    r"[^\S\n]+(?:University|College|Institute|Polytechnic|Academy|Vidyapeetham|Seminary))\b"
+    r"|\b([A-Z][A-Za-z'.]+(?:[^\S\n]+[A-Za-z'.]+){0,4}[^\S\n]+School)\b",
+)
+
+
+def _detect_edu_institutions(text: str) -> list[dict]:
+    spans = []
+    for m in _EDU_SUFFIX_RE.finditer(text):
+        matched = (m.group(1) or m.group(2)).strip()
+        words = matched.split()
+        if len(words) < 2:
+            continue
+        # Skip if the opening word is a common non-name word (e.g. "Primary School")
+        if words[0].rstrip(".'") in _NON_NAME:
+            continue
+        spans.append(_span(
+            matched, m.start(), m.start() + len(matched),
+            "ORGANIZATION", "redacted", "anonymize", 0.83,
+            f"Matched '{matched}' as an educational institution name; "
+            "institution names in a résumé narrow down the candidate's identity. Anonymized.",
+        ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
+# PROJECT_NAME — personal project names in résumé project sections
+#
+# Supports two common résumé formats:
+#   Format A: "ProjectName  |  description"
+#   Format B: "ProjectName – subtitle – GitHub" (en-dash + GitHub at end)
+#             "ProjectName - subtitle - GitHub" (hyphen variant)
+# ---------------------------------------------------------------------------
+
+_PROJECT_PIPE_RE = re.compile(
+    r"^(?:Project:\s+)?([A-Za-z][A-Za-z0-9 '\-\(\)]{1,80}?)-?\s*\|",
+    re.MULTILINE,
+)
+_PROJECT_GITHUB_RE = re.compile(
+    r"^(?:Project:\s+)?([A-Za-z][A-Za-z0-9 '\-\(\)]{1,80}?)\s*[–\-]\s*"
+    r"(?:.+[–\-]\s*)?GitHub\s*$",
+    re.MULTILINE,
+)
+_YEAR_IN_LINE_RE = re.compile(r"\b(?:19|20)\d{2}\b")
+
+
+def _detect_project_names(text: str) -> list[dict]:
+    spans = []
+    seen: set[tuple[int, int]] = set()
+
+    for pat in (_PROJECT_PIPE_RE, _PROJECT_GITHUB_RE):
+        for m in pat.finditer(text):
+            name = m.group(1).strip(" -–")
+            if not name or len(name) < 3:
+                continue
+            # If the rest of the line contains a year, this is an employer/date line
+            line_end = text.find("\n", m.start())
+            rest = text[m.end(1): line_end if line_end != -1 else len(text)]
+            if _YEAR_IN_LINE_RE.search(rest):
+                continue
+            s, e = m.start(1), m.start(1) + len(name)
+            if (s, e) in seen:
+                continue
+            seen.add((s, e))
+            spans.append(_span(
+                name, s, e,
+                "PROJECT_NAME", "redacted", "anonymize", 0.85,
+                f"Matched '{name}' as a personal project name "
+                "(text before a résumé '|' or '– GitHub' separator); "
+                "personal project names link back to the author's public portfolio. Anonymized.",
+            ))
+    return spans
+
+
+# ---------------------------------------------------------------------------
 # Public interface
 # ---------------------------------------------------------------------------
 
@@ -420,15 +692,19 @@ def detect(text: str) -> list[dict]:
     """Run all heuristic detectors. Returns raw span dicts (no IDs)."""
     results = []
     for fn in (
-        _detect_titled_names,   # Title. Surname — most specific name pattern
-        _detect_allcaps_names,  # DR. SARAH CHEN — letterhead style
-        _detect_names,          # generic consecutive title-case words
+        _detect_allcaps_resume_names,  # FIRSTNAME M LASTNAME header lines
+        _detect_titled_names,          # Title. Surname — most specific name pattern
+        _detect_allcaps_names,         # DR. SARAH CHEN — letterhead style
+        _detect_names,                 # generic consecutive title-case words
         _detect_locations,
         _detect_addresses,
         _detect_facilities,
         _detect_health_info,
         _detect_marital_status,
         _detect_ethnicity,
+        _detect_organizations,         # employer / school names in resume date-lines
+        _detect_edu_institutions,      # school/college names not on date-lines
+        _detect_project_names,         # project names before "|" separator
     ):
         results.extend(fn(text))
     return results

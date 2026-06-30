@@ -25,7 +25,30 @@
       "PowerShell(Stop-Process *)",
       "Bash(cmd /c \"taskkill /F /PID 37728\")",
       "PowerShell(Get-NetTCPConnection *)",
-      "Bash(curl -s http://127.0.0.1:8002/api/sample)"
+      "Bash(curl -s http://127.0.0.1:8002/api/sample)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('gsap:', p.dependencies.gsap\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(curl -s http://localhost:8002/api/health)",
+      "Bash(curl -s http://localhost:8002/api/sample)",
+      "Bash(tasklist)",
+      "Bash(curl -s -X POST http://localhost:8002/api/process -F \"file=@/c/Users/amrit/SprintFour/sprintFour/AmrithaSNidhi_6thSemResume.pdf\")",
+      "Bash(taskkill /PID 25308 /F)",
+      "Bash(taskkill /PID 25308 /F /T)",
+      "Bash(taskkill /PID 32044 /F /T)",
+      "Bash(python -m uvicorn main:app --host 127.0.0.1 --port 8002 --reload)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -X POST http://127.0.0.1:8002/detect -H 'Content-Type: application/json' -d '{\"text\": \"AMRITHA S NIDHI\\\\namrithasnidhi1234@gmail.com\\\\n+91 98765 43210\\\\n\\\\nEDUCATION\\\\nAmrita School of Engineering\\\\nAmrita Vishwa Vidyapeetham, Coimbatore\\\\nB.Tech Computer Science Aug 2020 – Jul 2024\\\\nCGPA: 8.5\\\\n\\\\nSt. Joseph Public School, Kerala\\\\nSSLC May 2019 Percentage – 95%\\\\n\\\\nEXPERIENCE\\\\nFideltaV | Software Engineer | Jan 2024 – Present\\\\nProject: LifeForgeConnect | React, Node.js – GitHub\\\\n\\\\ngithub.com/amrithasnidhi\\\\nlinkedin.com/in/amritha-s-nidhi-111asn\"}')",
+      "Bash(curl -s http://127.0.0.1:8002/openapi.json)",
+      "Bash(curl -s -X POST http://127.0.0.1:8002/api/process -H 'Content-Type: application/json' -d '{\"text\": \"AMRITHA S NIDHI\\\\namrithasnidhi1234@gmail.com\\\\n+91 98765 43210\\\\n\\\\nEDUCATION\\\\nAmrita School of Engineering\\\\nAmrita Vishwa Vidyapeetham, Coimbatore\\\\nB.Tech Computer Science Aug 2020 – Jul 2024\\\\nCGPA: 8.5\\\\n\\\\nSt. Joseph Public School, Kerala\\\\nSSLC May 2019 Percentage – 95%\\\\n\\\\nEXPERIENCE\\\\nFideltaV | Software Engineer | Jan 2024 – Present\\\\nProject: LifeForgeConnect | React, Node.js – GitHub\\\\n\\\\ngithub.com/amrithasnidhi\\\\nlinkedin.com/in/amritha-s-nidhi-111asn\"}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8002/api/process -H 'Content-Type: application/json' -d '{\"text\": \"AMRITHA S NIDHI\\\\namrithasnidhi1234@gmail.com\\\\n+91 98765 43210\"}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8002/api/process -F 'file=@/tmp/test_resume.txt;type=text/plain')",
+      "Bash(curl -v -X POST http://127.0.0.1:8002/api/process -F 'file=@/tmp/test_resume.txt;type=text/plain')",
+      "Bash(taskkill //F //IM python.exe)",
+      "Bash(taskkill //F //IM python3.exe sleep 2 netstat -ano)",
+      "Bash(python -m uvicorn main:app --host 127.0.0.1 --port 8002)",
+      "Bash(npm run *)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -s http://localhost:5173/)"
     ]
   }
 }
